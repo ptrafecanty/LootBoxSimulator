@@ -1,0 +1,2 @@
+# LootBoxSimulator
+Loot Box Sim
