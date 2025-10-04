@@ -2,6 +2,7 @@ import pygame
 import random
 import json
 import os
+import math
 from lootbox_sim.inventory import Inventory
 
 class GameScreen:
@@ -29,6 +30,31 @@ class GameScreen:
         self.chest_open_timer = 0
         self.chest_open_duration = 1.0  # 1 second animation
         self.chest_lid_angle = 0  # 0 = closed, 90 = fully open
+
+        # Mimic surprise system
+        self.mimic_chance = 0.15  # 15% chance of mimic
+        self.is_mimic = False
+        self.mimic_revealed = False
+        self.mimic_timer = 0
+        self.mimic_duration = 3.0  # 3 seconds mimic display
+        
+        # Hilarious mimic roast lines (shorter for better screen fit)
+        self.mimic_roasts = [
+            "Git gud! 🤡",
+            "Skill issue! 💀",
+            "Got em! �",
+            "L + ratio! 🌱",
+            "Pranked! 📺",
+            "Greedy much? 🤑",
+            "MIMIC'D! �",
+            "No loot 4 u! 🏆",
+            "Rookie! 👑",
+            "Gnomed! 🧙‍♂️",
+            "Played urself! 🎉",
+            "Ez clap! ⚡",
+            "Trap card! 🃏",
+            "Flawless! 🎯"
+        ]
 
         # Inventory grid settings
         self.inventory_grid_cols = 6
@@ -195,11 +221,21 @@ class GameScreen:
         return None
 
     def open_loot_box(self):
-        # Don't open if already opening
-        if self.chest_is_opening:
+        # Don't open if already opening or mimic is active
+        if self.chest_is_opening or self.is_mimic:
             return
             
-        # Start opening animation
+        # Check for mimic first!
+        if random.random() < self.mimic_chance:
+            # It's a mimic! 
+            self.is_mimic = True
+            self.mimic_revealed = False
+            self.mimic_timer = 0
+            self.chest_is_opening = True  # Start opening animation first
+            self.chest_open_timer = 0
+            return
+            
+        # Normal chest opening
         self.chest_is_opening = True
         self.chest_open_timer = 0
         
@@ -317,6 +353,92 @@ class GameScreen:
             # Add a small highlight
             pygame.draw.rect(surface, (96, 96, 96), corner_rect, 1)
 
+    def draw_mimic(self, surface):
+        """Draw a scary mimic that has revealed itself"""
+        x, y = self.loot_box_rect.x, self.loot_box_rect.y
+        w, h = self.loot_box_rect.width, self.loot_box_rect.height
+        
+        # Animate the reveal
+        reveal_progress = min(self.mimic_timer / 1.0, 1.0)  # 1 second to fully reveal
+        
+        if not self.mimic_revealed and reveal_progress < 1.0:
+            # Still looks like a chest but starting to change
+            self.draw_treasure_chest(surface)
+            
+            # Add subtle warning signs
+            if reveal_progress > 0.3:
+                # Eyes starting to appear
+                eye_alpha = int((reveal_progress - 0.3) * 255 / 0.7)
+                if eye_alpha > 0:
+                    # Left eye
+                    pygame.draw.circle(surface, (255, 0, 0), 
+                                     (x + w//3, y + h//3), 8)
+                    pygame.draw.circle(surface, (0, 0, 0), 
+                                     (x + w//3, y + h//3), 4)
+                    # Right eye  
+                    pygame.draw.circle(surface, (255, 0, 0), 
+                                     (x + 2*w//3, y + h//3), 8)
+                    pygame.draw.circle(surface, (0, 0, 0), 
+                                     (x + 2*w//3, y + h//3), 4)
+            
+            if reveal_progress >= 1.0:
+                self.mimic_revealed = True
+        else:
+            # Fully revealed mimic - scary!
+            shake_x = int(random.random() * 6 - 3)  # Shake effect
+            shake_y = int(random.random() * 6 - 3)
+            
+            mimic_x = x + shake_x
+            mimic_y = y + shake_y
+            
+            # Main mimic body (darker, more menacing)
+            body_rect = pygame.Rect(mimic_x, mimic_y + h//4, w, h*3//4)
+            pygame.draw.rect(surface, (60, 40, 20), body_rect)  # Dark brown
+            pygame.draw.rect(surface, (80, 40, 40), body_rect, 4)  # Red-brown outline
+            
+            # Gaping mouth with teeth
+            mouth_rect = pygame.Rect(mimic_x + 10, mimic_y + h//2, w - 20, h//3)
+            pygame.draw.rect(surface, (40, 0, 0), mouth_rect)  # Dark red mouth
+            
+            # Sharp teeth
+            teeth_count = 8
+            for i in range(teeth_count):
+                tooth_x = mouth_rect.x + (i * mouth_rect.width // teeth_count)
+                tooth_points = [
+                    (tooth_x, mouth_rect.y),
+                    (tooth_x + 8, mouth_rect.y + 15),
+                    (tooth_x + 16, mouth_rect.y)
+                ]
+                pygame.draw.polygon(surface, (255, 255, 255), tooth_points)
+            
+            # Evil glowing eyes
+            eye_glow = int(abs(math.sin(self.mimic_timer * 10)) * 100) + 155
+            # Left eye
+            pygame.draw.circle(surface, (eye_glow, 50, 50), 
+                             (mimic_x + w//3, mimic_y + h//4), 12)
+            pygame.draw.circle(surface, (255, 0, 0), 
+                             (mimic_x + w//3, mimic_y + h//4), 8)
+            pygame.draw.circle(surface, (0, 0, 0), 
+                             (mimic_x + w//3, mimic_y + h//4), 4)
+            
+            # Right eye
+            pygame.draw.circle(surface, (eye_glow, 50, 50), 
+                             (mimic_x + 2*w//3, mimic_y + h//4), 12)
+            pygame.draw.circle(surface, (255, 0, 0), 
+                             (mimic_x + 2*w//3, mimic_y + h//4), 8)
+            pygame.draw.circle(surface, (0, 0, 0), 
+                             (mimic_x + 2*w//3, mimic_y + h//4), 4)
+            
+            # Spikes and claws coming out
+            for i in range(4):
+                angle = i * 1.57  # 90 degrees each
+                spike_x = mimic_x + w//2 + int(30 * math.cos(angle))
+                spike_y = mimic_y + h//2 + int(30 * math.sin(angle))
+                spike_end_x = spike_x + int(20 * math.cos(angle))
+                spike_end_y = spike_y + int(20 * math.sin(angle))
+                pygame.draw.line(surface, (100, 100, 100), 
+                               (spike_x, spike_y), (spike_end_x, spike_end_y), 5)
+
     def update(self, dt):
         # Update popup timer
         if self.popup_timer > 0:
@@ -332,6 +454,76 @@ class GameScreen:
                 self.chest_is_opening = False
                 self.chest_open_timer = 0
                 self.chest_lid_angle = 0
+
+        # Update mimic encounter
+        if self.is_mimic:
+            self.mimic_timer += dt
+            
+            # Reveal mimic after chest opening animation (ONLY ONCE!)
+            if self.chest_open_timer >= 0.5 and not self.mimic_revealed:
+                # Mark as revealed to prevent spam
+                self.mimic_revealed = True
+                
+                # Surprise! Show initial mimic reveal message
+                initial_roast = random.choice(self.mimic_roasts)
+                self.popup_text = f"MIMIC! {initial_roast}"
+                self.popup_timer = 3.0
+                print(f"MIMIC ENCOUNTER! {initial_roast}")
+                
+            if self.mimic_timer >= self.mimic_duration:
+                # Mimic encounter ends
+                self.mimic_consequence()
+                self.reset_mimic()
+
+    def mimic_consequence(self):
+        """Handle what happens when you encounter a mimic"""
+        # Additional savage roast lines for stealing items (shorter!)
+        steal_roasts = [
+            "Yoink! �", 
+            "Mine now! 💸",
+            "Finessed! 🎭",
+            "Robbery! 🔫",
+            "Pickpocketed! 🕵️",
+            "Nom nom! 😋",
+            "Stolen! 🤲"
+        ]
+        
+        no_items_roasts = [
+            "Broke! 📊",
+            "Empty! �",
+            "Nothing! �",
+            "Poverty! 🚫",
+            "Sad! 😢"
+        ]
+        
+        if len(self.inventory.items) > 0:
+            # Mimic steals a random item with savage commentary!
+            items_list = list(self.inventory.items.keys())
+            stolen_item = random.choice(items_list)
+            steal_roast = random.choice(steal_roasts)
+            
+            if self.inventory.items[stolen_item] > 1:
+                self.inventory.items[stolen_item] -= 1
+            else:
+                del self.inventory.items[stolen_item]
+            
+            self.popup_text = f"Ate {stolen_item}! {steal_roast}"
+            self.popup_timer = 3.0
+            print(f"Mimic stole: {stolen_item} - {steal_roast}")
+        else:
+            # No items to steal, extra savage roast
+            no_items_roast = random.choice(no_items_roasts)
+            self.popup_text = f"No items! {no_items_roast}"
+            self.popup_timer = 2.5
+            print(f"Mimic found no items - {no_items_roast}")
+
+    def reset_mimic(self):
+        """Reset mimic state back to normal chest"""
+        self.is_mimic = False
+        self.mimic_revealed = False
+        self.mimic_timer = 0
+        self.chest_is_opening = False
+        self.chest_open_timer = 0
 
     def draw_inventory_grid(self, surface):
         """Draw the inventory as a grid with icons"""
@@ -395,13 +587,25 @@ class GameScreen:
     def draw(self, surface):
         surface.fill((30, 30, 60))  # background
         
-        # Draw the treasure chest instead of a simple rectangle
-        self.draw_treasure_chest(surface)
+        # Draw mimic or treasure chest
+        if self.is_mimic and self.mimic_timer > 0.5:
+            # Draw the scary mimic
+            self.draw_mimic(surface)
+        else:
+            # Draw normal treasure chest
+            self.draw_treasure_chest(surface)
 
-        # Add a glow effect around the chest to make it more attractive
-        glow_rect = pygame.Rect(self.loot_box_rect.x - 5, self.loot_box_rect.y - 5,
-                               self.loot_box_rect.width + 10, self.loot_box_rect.height + 10)
-        pygame.draw.rect(surface, (100, 80, 20), glow_rect, 3)  # Golden glow
+        # Add a glow effect around the chest (different color for mimic)
+        if self.is_mimic and self.mimic_revealed:
+            # Red menacing glow for mimic
+            glow_rect = pygame.Rect(self.loot_box_rect.x - 10, self.loot_box_rect.y - 10,
+                                   self.loot_box_rect.width + 20, self.loot_box_rect.height + 20)
+            pygame.draw.rect(surface, (150, 20, 20), glow_rect, 5)  # Red glow
+        else:
+            # Normal golden glow
+            glow_rect = pygame.Rect(self.loot_box_rect.x - 5, self.loot_box_rect.y - 5,
+                                   self.loot_box_rect.width + 10, self.loot_box_rect.height + 10)
+            pygame.draw.rect(surface, (100, 80, 20), glow_rect, 3)  # Golden glow
 
         # Popup text
         if self.popup_text:
