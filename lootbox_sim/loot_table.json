@@ -1,0 +1,6 @@
+[
+  { "name": "Common Sword", "chance": 0.6 },
+  { "name": "Rare Shield", "chance": 0.25 },
+  { "name": "Epic Staff", "chance": 0.1 },
+  { "name": "Legendary Dragon", "chance": 0.05 }
+]
