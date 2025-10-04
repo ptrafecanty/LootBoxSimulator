@@ -76,4 +76,40 @@ def test_chest_opening_animation():
     assert gs.chest_is_opening == False
     assert gs.chest_open_timer == 0
 
+def test_item_categorization():
+    gs = GameScreen(800, 600)
+    
+    # Test weapon categorization
+    assert gs.get_item_category("Steel Sword") == "weapon"
+    assert gs.get_item_category("Elven Bow") == "weapon"
+    assert gs.get_item_category("Lightning Staff") == "weapon"
+    
+    # Test armor categorization
+    assert gs.get_item_category("Rare Shield") == "armor"
+    assert gs.get_item_category("Leather Boots") == "armor"
+    assert gs.get_item_category("Iron Helmet") == "armor"
+    
+    # Test accessory categorization
+    assert gs.get_item_category("Silver Ring") == "accessory"
+    assert gs.get_item_category("Crystal Amulet") == "accessory"
+    assert gs.get_item_category("Crown of Kings") == "accessory"
+    
+    # Test consumable categorization
+    assert gs.get_item_category("Health Potion") == "consumable"
+    assert gs.get_item_category("Magic Scroll") == "consumable"
+    
+    # Test legendary categorization
+    assert gs.get_item_category("Legendary Dragon") == "legendary"
+    assert gs.get_item_category("Universe Crystal") == "legendary"
+
+def test_inventory_grid_settings():
+    gs = GameScreen(800, 600)
+    
+    # Check grid settings are properly initialized
+    assert gs.inventory_grid_cols == 6
+    assert gs.inventory_grid_rows == 4
+    assert gs.inventory_slot_size == 60
+    assert gs.inventory_start_x == 50
+    assert gs.inventory_start_y == 200
+
 pygame.quit()

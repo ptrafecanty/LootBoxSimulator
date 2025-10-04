@@ -30,6 +30,141 @@ class GameScreen:
         self.chest_open_duration = 1.0  # 1 second animation
         self.chest_lid_angle = 0  # 0 = closed, 90 = fully open
 
+        # Inventory grid settings
+        self.inventory_grid_cols = 6
+        self.inventory_grid_rows = 4
+        self.inventory_slot_size = 60
+        self.inventory_start_x = 50
+        self.inventory_start_y = 200
+
+    def get_item_category(self, item_name):
+        """Categorize items based on their name"""
+        item_lower = item_name.lower()
+        
+        # Check legendary first (highest priority)
+        if any(legendary in item_lower for legendary in ['dragon', 'legendary', 'epic', 'universe', 'cosmic', 'infinity', 'god']):
+            return 'legendary'
+        
+        # Weapons
+        elif any(weapon in item_lower for weapon in ['sword', 'blade', 'dagger', 'bow', 'crossbow', 'staff', 'excalibur']):
+            return 'weapon'
+        
+        # Armor & Protection
+        elif any(armor in item_lower for armor in ['shield', 'armor', 'mail', 'helmet', 'boots', 'gauntlets', 'cloak']):
+            return 'armor'
+        
+        # Accessories
+        elif any(accessory in item_lower for accessory in ['ring', 'amulet', 'crown', 'crystal', 'orb', 'gauntlet']):
+            return 'accessory'
+        
+        # Consumables
+        elif any(consumable in item_lower for consumable in ['potion', 'scroll', 'feather']):
+            return 'consumable'
+        
+        # Default to misc
+        return 'misc'
+
+    def draw_item_icon(self, surface, item_name, x, y, size=40):
+        """Draw an icon for the given item based on its category"""
+        category = self.get_item_category(item_name)
+        center_x = x + size // 2
+        center_y = y + size // 2
+        
+        # Background circle for all items
+        pygame.draw.circle(surface, (50, 50, 50), (center_x, center_y), size // 2)
+        pygame.draw.circle(surface, (100, 100, 100), (center_x, center_y), size // 2, 2)
+        
+        if category == 'weapon':
+            # Draw a sword icon
+            if 'bow' in item_name.lower() or 'crossbow' in item_name.lower():
+                # Bow shape
+                pygame.draw.arc(surface, (139, 90, 43), 
+                               (x + 8, y + 8, size - 16, size - 16), 0.5, 2.6, 3)
+                pygame.draw.line(surface, (139, 90, 43), 
+                               (center_x, y + 12), (center_x, y + size - 12), 2)
+            elif 'staff' in item_name.lower():
+                # Staff shape
+                pygame.draw.line(surface, (139, 90, 43), 
+                               (center_x, y + 8), (center_x, y + size - 8), 4)
+                pygame.draw.circle(surface, (255, 215, 0), (center_x, y + 12), 6)
+            else:
+                # Sword shape
+                pygame.draw.line(surface, (192, 192, 192), 
+                               (center_x, y + 8), (center_x, y + size - 12), 3)
+                pygame.draw.rect(surface, (139, 90, 43), 
+                               (center_x - 4, y + size - 12, 8, 6))
+                
+        elif category == 'armor':
+            if 'shield' in item_name.lower():
+                # Shield shape
+                pygame.draw.ellipse(surface, (100, 100, 100), 
+                                  (x + 10, y + 10, size - 20, size - 20))
+                pygame.draw.ellipse(surface, (150, 150, 150), 
+                                  (x + 10, y + 10, size - 20, size - 20), 2)
+            elif 'boots' in item_name.lower():
+                # Boot shape
+                pygame.draw.ellipse(surface, (139, 90, 43), 
+                                  (x + 12, y + 18, size - 24, size - 30))
+                pygame.draw.rect(surface, (139, 90, 43), 
+                               (x + 12, y + 25, size - 24, 8))
+            else:
+                # Generic armor (chest piece)
+                pygame.draw.rect(surface, (100, 100, 100), 
+                               (x + 12, y + 12, size - 24, size - 24))
+                pygame.draw.rect(surface, (150, 150, 150), 
+                               (x + 12, y + 12, size - 24, size - 24), 2)
+                
+        elif category == 'accessory':
+            if 'ring' in item_name.lower():
+                # Ring shape
+                pygame.draw.circle(surface, (255, 215, 0), (center_x, center_y), 8, 3)
+                pygame.draw.circle(surface, (255, 255, 0), (center_x, center_y - 4), 3)
+            elif 'crown' in item_name.lower():
+                # Crown shape
+                points = [(x + 10, y + 25), (x + 15, y + 15), (x + 20, y + 20), 
+                         (x + 25, y + 10), (x + 30, y + 20), (x + 35, y + 15), (x + 40, y + 25)]
+                pygame.draw.polygon(surface, (255, 215, 0), points)
+            else:
+                # Generic accessory (crystal/orb)
+                pygame.draw.polygon(surface, (100, 200, 255), 
+                                  [(center_x, y + 10), (x + 12, center_y), 
+                                   (center_x, y + size - 10), (x + size - 12, center_y)])
+                
+        elif category == 'consumable':
+            if 'potion' in item_name.lower():
+                # Potion bottle
+                pygame.draw.rect(surface, (100, 255, 100), 
+                               (x + 15, y + 15, size - 30, size - 25))
+                pygame.draw.rect(surface, (50, 150, 50), 
+                               (x + 17, y + 12, size - 34, 6))
+            else:
+                # Scroll
+                pygame.draw.rect(surface, (245, 245, 220), 
+                               (x + 10, y + 12, size - 20, size - 24))
+                pygame.draw.line(surface, (139, 90, 43), 
+                               (x + 15, y + 18), (x + size - 15, y + 18), 1)
+                pygame.draw.line(surface, (139, 90, 43), 
+                               (x + 15, y + 22), (x + size - 15, y + 22), 1)
+                
+        elif category == 'legendary':
+            # Special glowing effect for legendary items
+            pygame.draw.circle(surface, (255, 100, 255), (center_x, center_y), size // 2 - 2, 3)
+            pygame.draw.circle(surface, (255, 215, 0), (center_x, center_y), size // 2 - 8)
+            # Add sparkle effect
+            for i in range(4):
+                angle = i * 3.14159 / 2
+                spark_x = center_x + int((size // 3) * (0.7 if i % 2 else 1) * 
+                                       (1 if i < 2 else -1) * (1 if i % 2 == 0 else 0))
+                spark_y = center_y + int((size // 3) * (0.7 if i % 2 else 1) * 
+                                       (1 if i >= 2 else -1) * (0 if i % 2 == 0 else 1))
+                pygame.draw.circle(surface, (255, 255, 255), (spark_x, spark_y), 2)
+        else:
+            # Misc item - simple box
+            pygame.draw.rect(surface, (150, 150, 150), 
+                           (x + 12, y + 12, size - 24, size - 24))
+            pygame.draw.rect(surface, (200, 200, 200), 
+                           (x + 12, y + 12, size - 24, size - 24), 2)
+
     def load_loot_table(self):
         """Load loot table from JSON file"""
         try:
@@ -198,6 +333,65 @@ class GameScreen:
                 self.chest_open_timer = 0
                 self.chest_lid_angle = 0
 
+    def draw_inventory_grid(self, surface):
+        """Draw the inventory as a grid with icons"""
+        # Draw background panel
+        panel_width = self.inventory_grid_cols * (self.inventory_slot_size + 5) + 15
+        panel_height = self.inventory_grid_rows * (self.inventory_slot_size + 5) + 60
+        panel_rect = pygame.Rect(self.inventory_start_x - 10, self.inventory_start_y - 40, 
+                                panel_width, panel_height)
+        
+        # Semi-transparent background
+        panel_surface = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
+        pygame.draw.rect(panel_surface, (20, 20, 40, 200), (0, 0, panel_width, panel_height))
+        pygame.draw.rect(panel_surface, (100, 100, 100), (0, 0, panel_width, panel_height), 2)
+        surface.blit(panel_surface, (panel_rect.x, panel_rect.y))
+        
+        # Draw header
+        header_font = pygame.font.SysFont(None, 36)
+        header = header_font.render("Inventory", True, (255, 255, 255))
+        surface.blit(header, (self.inventory_start_x, self.inventory_start_y - 30))
+        
+        # Draw grid slots
+        items_list = list(self.inventory.items.items())
+        slot_index = 0
+        
+        for row in range(self.inventory_grid_rows):
+            for col in range(self.inventory_grid_cols):
+                # Calculate slot position
+                slot_x = self.inventory_start_x + col * (self.inventory_slot_size + 5)
+                slot_y = self.inventory_start_y + row * (self.inventory_slot_size + 5)
+                
+                # Draw slot background
+                slot_rect = pygame.Rect(slot_x, slot_y, self.inventory_slot_size, self.inventory_slot_size)
+                pygame.draw.rect(surface, (40, 40, 60), slot_rect)
+                pygame.draw.rect(surface, (80, 80, 100), slot_rect, 2)
+                
+                # Draw item if it exists
+                if slot_index < len(items_list):
+                    item_name, item_count = items_list[slot_index]
+                    
+                    # Draw item icon
+                    icon_size = self.inventory_slot_size - 10
+                    icon_x = slot_x + 5
+                    icon_y = slot_y + 5
+                    self.draw_item_icon(surface, item_name, icon_x, icon_y, icon_size)
+                    
+                    # Draw item count
+                    if item_count > 1:
+                        count_font = pygame.font.SysFont(None, 24)
+                        count_text = count_font.render(str(item_count), True, (255, 255, 255))
+                        count_bg_rect = pygame.Rect(slot_x + self.inventory_slot_size - 20, 
+                                                   slot_y + self.inventory_slot_size - 20, 18, 18)
+                        pygame.draw.rect(surface, (0, 0, 0, 150), count_bg_rect)
+                        surface.blit(count_text, (slot_x + self.inventory_slot_size - 18, 
+                                                 slot_y + self.inventory_slot_size - 18))
+                    
+                    # Draw item name on hover (simplified - always show for now)
+                    # You could add mouse hover detection here later
+                    
+                slot_index += 1
+
     def draw(self, surface):
         surface.fill((30, 30, 60))  # background
         
@@ -216,11 +410,4 @@ class GameScreen:
 
         # Inventory display
         if self.show_inventory:
-            y_offset = 200
-            header = self.font.render("Inventory:", True, (255, 255, 255))
-            surface.blit(header, (50, y_offset))
-            y_offset += 50
-            for name, count in self.inventory.items.items():
-                item_text = self.font.render(f"{name}: {count}", True, (255, 255, 255))
-                surface.blit(item_text, (50, y_offset))
-                y_offset += 40
+            self.draw_inventory_grid(surface)
