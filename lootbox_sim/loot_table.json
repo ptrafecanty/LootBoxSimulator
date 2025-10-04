@@ -1,6 +1,37 @@
 [
-  { "name": "Common Sword", "chance": 0.6 },
-  { "name": "Rare Shield", "chance": 0.25 },
-  { "name": "Epic Staff", "chance": 0.1 },
-  { "name": "Legendary Dragon", "chance": 0.05 }
+  { "name": "Rusty Dagger", "chance": 0.15 },
+  { "name": "Common Sword", "chance": 0.12 },
+  { "name": "Basic Shield", "chance": 0.10 },
+  { "name": "Wooden Bow", "chance": 0.08 },
+  { "name": "Leather Boots", "chance": 0.07 },
+  { "name": "Health Potion", "chance": 0.06 },
+  { "name": "Iron Helmet", "chance": 0.05 },
+  { "name": "Chain Mail", "chance": 0.05 },
+  
+  { "name": "Steel Sword", "chance": 0.04 },
+  { "name": "Rare Shield", "chance": 0.04 },
+  { "name": "Silver Ring", "chance": 0.03 },
+  { "name": "Enchanted Boots", "chance": 0.03 },
+  { "name": "Magic Scroll", "chance": 0.025 },
+  { "name": "Crossbow", "chance": 0.025 },
+  { "name": "Mithril Chainmail", "chance": 0.02 },
+  { "name": "Crystal Amulet", "chance": 0.02 },
+  
+  { "name": "Epic Staff", "chance": 0.015 },
+  { "name": "Flaming Sword", "chance": 0.015 },
+  { "name": "Dragon Scale Armor", "chance": 0.012 },
+  { "name": "Elven Bow", "chance": 0.012 },
+  { "name": "Frost Gauntlets", "chance": 0.01 },
+  { "name": "Shadow Cloak", "chance": 0.01 },
+  { "name": "Lightning Staff", "chance": 0.008 },
+  { "name": "Phoenix Feather", "chance": 0.008 },
+  
+  { "name": "Legendary Dragon", "chance": 0.005 },
+  { "name": "Excalibur", "chance": 0.004 },
+  { "name": "Crown of Kings", "chance": 0.003 },
+  { "name": "God Slayer Blade", "chance": 0.003 },
+  { "name": "Infinity Gauntlet", "chance": 0.002 },
+  { "name": "Time Manipulation Orb", "chance": 0.002 },
+  { "name": "Cosmic Shield", "chance": 0.001 },
+  { "name": "Universe Crystal", "chance": 0.001 }
 ]
